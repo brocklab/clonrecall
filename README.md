@@ -42,14 +42,14 @@ To generate all six oligos which will be used to generate the recall plasmid you
 clonrecall oligo -s GCAATATGCGGTACGATTCG -n lin1
 ```
 
-By defualt the oligos command will print the comma seperated sequences to `stdout`.
+By default the oligos command will print the comma separated sequences to `stdout`.
 These can be directly copied and pasted into IDT's bulk input.
 
-You may also specify and output file with `-o/--ouput`.
+You may also specify and output file with `-o/--output`.
 
 ### Plasmids
 
-Similary you can generate an annotated recall vector with a 3x barcode array.
+Similarly you can generate an annotated recall vector with a 3x barcode array.
 In this case `-o/--output` is specifying a directory to save all generated `.gb` files.
 
 ```bash
