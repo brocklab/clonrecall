@@ -1,0 +1,118 @@
+LOCUS       Recall-BgN20_3x_array-miniCMV-sfGFP        3576 bp    DNA     circular UNA 13-MAY-2022
+DEFINITION  .
+ACCESSION   urn.local...32-eta8bb4
+VERSION     urn.local...32-eta8bb4
+KEYWORDS    .
+SOURCE      
+  ORGANISM  .
+FEATURES             Location/Qualifiers
+     regulatory      10..534
+                     /note="Geneious type: terminator"
+                     /standard_name="rb_glob_PA term"
+     misc_feature    complement(555..561)
+                     /standard_name="SapI"
+     misc_feature    567..573
+                     /standard_name="SapI"
+     misc_feature    complement(601..1220)
+                     /note="Geneious type: origin of replication"
+                     /standard_name="pBR322 origin"
+     misc_feature    complement(1375..2235)
+                     /note="Geneious type: marker"
+                     /standard_name="amp marker"
+     regulatory      complement(2277..2305)
+                     /note="Geneious type: promoter"
+                     /standard_name="amp prom"
+     regulatory      complement(2318..2545)
+                     /note="Geneious type: terminator"
+                     /standard_name="bGH_PA term"
+     misc_feature    complement(2572..2577)
+                     /note="Geneious type: motif"
+                     /standard_name="BsmBI"
+     misc_feature    2603..2608
+                     /note="Geneious type: motif"
+                     /standard_name="BsmBI"
+     misc_feature    2629..2648
+                     /note="Geneious type: marker"
+                     /standard_name="Barcode"
+     misc_feature    2649..2651
+                     /note="Geneious type: marker"
+                     /standard_name="PAM"
+     misc_feature    2685..2704
+                     /note="Geneious type: marker"
+                     /standard_name="Barcode"
+     misc_feature    2705..2707
+                     /note="Geneious type: marker"
+                     /standard_name="PAM"
+     misc_feature    2741..2760
+                     /note="Geneious type: marker"
+                     /standard_name="Barcode"
+     misc_feature    2761..2763
+                     /note="Geneious type: marker"
+                     /standard_name="PAM"
+     regulatory      2782..2842
+                     /note="Geneious type: promoter"
+                     /standard_name="miniCMV"
+     gene            2860..3576
+                     /standard_name="sfGFP"
+ORIGIN      
+        1 aggtccggcc gcactcctca ggtgcaggct gcctatcaga aggtggtggc tggtgtggcc
+       61 aatgccctgg ctcacaaata ccactgagat ctttttccct ctgccaaaaa ttatggggac
+      121 atcatgaagc cccttgagca tctgacttct ggctaataaa ggaaatttat tttcattgca
+      181 atagtgtgtt ggaatttttt gtgtctctca ctcggaagga catatgggag ggcaaatcat
+      241 ttaaaacatc agaatgagta tttggtttag agtttggcaa catatgccat atgctggctg
+      301 ccatgaacaa aggtggctat aaagaggtca tcagtatatg aaacagcccc ctgctgtcca
+      361 ttccttattc catagaaaag ccttgacttg aggttagatt ttttttatat tttgttttgt
+      421 gttatttttt tctttaacat ccctaaaatt ttccttacat gttttactag ccagattttt
+      481 cctcctctcc tgactactcc cagtcatagc tgtccctctt ctcttatgaa gatccctcga
+      541 cctgcaggtc accagaagag ctaacggctc ttccaagcgg gccaggaacc gtaaaaaggc
+      601 cgcgttgctg gcgtttttcc ataggctccg cccccctgac gagcatcaca aaaatcgacg
+      661 ctcaagtcag aggtggcgaa acccgacagg actataaaga taccaggcgt ttccccctgg
+      721 aagctccctc gtgcgctctc ctgttccgac cctgccgctt accggatacc tgtccgcctt
+      781 tctcccttcg ggaagcgtgg cgctttctca atgctcacgc tgtaggtatc tcagttcggt
+      841 gtaggtcgtt cgctccaagc tgggctgtgt gcacgaaccc cccgttcagc ccgaccgctg
+      901 cgccttatcc ggtaactatc gtcttgagtc caacccggta agacacgact tatcgccact
+      961 ggcagcagcc actggtaaca ggattagcag agcgaggtat gtaggcggtg ctacagagtt
+     1021 cttgaagtgg tggcctaact acggctacac tagaaggaca gtatttggta tctgcgctct
+     1081 gctgaagcca gttaccttcg gaaaaagagt tggtagctct tgatccggca aacaaaccac
+     1141 cgctggtagc ggtggttttt ttgtttgcaa gcagcagatt acgcgcagaa aaaaaggatc
+     1201 tcaagaagat cctttgatct tttctacggg gtctgacgct cagtggaacg aaaactcacg
+     1261 ttaagggatt ttggtcatga gattatcaaa aaggatcttc acctagatcc ttttaaatta
+     1321 aaaatgaagt tttaaatcaa tctaaagtat atatgagtaa acttggtctg acagttacca
+     1381 atgcttaatc agtgaggcac ctatctcagc gatctgtcta tttcgttcat ccatagttgc
+     1441 ctgactcccc gtcgtgtaga taactacgat acgggagggc ttaccatctg gccccagtgc
+     1501 tgcaatgata ccgcgtgacc cacgctcacc ggctccagat ttatcagcaa taaaccagcc
+     1561 agccggaagg gccgagcgca gaagtggtcc tgcaacttta tccgcctcca tccagtctat
+     1621 taattgttgc cgggaagcta gagtaagtag ttcgccagtt aatagtttgc gcaacgttgt
+     1681 tgccattgct acaggcatcg tggtgtcacg ctcgtcgttt ggtatggctt cattcagctc
+     1741 cggttcccaa cgatcaaggc gagttacatg atcccccatg ttgtgcaaaa aagcggttag
+     1801 ctccttcggt cctccgatcg ttgtcagaag taagttggcc gcagtgttat cactcatggt
+     1861 tatggcagca ctgcataatt ctcttactgt catgccatcc gtaagatgct tttctgtgac
+     1921 tggtgagtac tcaaccaagt cattctgaga atagtgtatg cggcgaccga gttgctcttg
+     1981 cccggcgtca atacgggata ataccgcgcc acatagcaga actttaaaag tgctcatcat
+     2041 tggaaaacgt tcttcggggc gaaaactctc aaggatctta ccgctgttga gatccagttc
+     2101 gatgtaaccc actcgtgcac ccaactgatc ttcagcatct tttactttca ccagcgtttc
+     2161 tgggtgagca aaaacaggaa ggcaaaatgc cgcaaaaaag ggaataaggg cgacacggaa
+     2221 atgttgaata ctcatactct tcctttttca atattattga agcatttatc agggttattg
+     2281 tctcatgagc ggatacatat ttgaatgtat ttagtggcca tagagcccac cgcatcccca
+     2341 gcatgcctgc tattgacttc ccaatcctcc cccttgctgt cctgccccac cccacccccc
+     2401 agaatagaat gacacctact cagacaatgc gatgcaattt cctcatttta ttaggaaagg
+     2461 acagtgggag tggcaccttc cagggtcaag gaaggcacgg gggaggggca aacaacagat
+     2521 ggctggcaac tagaaggcac agtcgaggct gatcagcggg tttaaaggag cgagacgaag
+     2581 gctcactgtg cagactggag cgcgtctcct actcgaccaa gaaccgcann nnnnnnnnnn
+     2641 nnnnnnnnag gtggattagt tctctgcttg tcctgcggtt acccnnnnnn nnnnnnnnnn
+     2701 nnnnaggctg taatccagct gcgctgtggt atcactcgtc nnnnnnnnnn nnnnnnnnnn
+     2761 aggctcagct aaggtgcaat ggtaggcgtg tacggtggga ggcctatata agcagagctc
+     2821 gtttagtgaa ccgtcagatc gcctggagaa ttcgccacca tgagcaaagg agaagaactt
+     2881 ttcactggag ttgtcccaat tcttgttgaa ttagatggtg atgttaatgg gcacaaattt
+     2941 tctgtcagag gagagggtga aggtgatgct acaaacggaa aactcaccct taaatttatt
+     3001 tgcactactg gaaaactacc tgttccatgg ccaacacttg tcactactct gacctatggt
+     3061 gttcaatgct tttcccgtta tccggatcac atgaaacggc atgacttttt caagagtgcc
+     3121 atgcccgaag gttatgtaca ggaacgcact atatctttca aagatgacgg gacctacaag
+     3181 acgcgtgctg aagtcaagtt tgaaggtgat acccttgtta atcgtatcga gttaaaaggt
+     3241 attgatttta aagaagatgg aaacattctc ggacacaaac tcgagtacaa ctttaactca
+     3301 cacaatgtat acatcacggc agacaaacaa aagaatggaa tcaaagctaa cttcaaaatt
+     3361 cgccacaacg ttgaagatgg ttccgttcaa ctagcagacc attatcaaca aaatactcca
+     3421 attggcgatg gccctgtcct tttaccagac aaccattacc tgtcgacaca atctgtcctt
+     3481 tcgaaagatc ccaacgaaaa gcgtgaccac atggtccttc ttgagtttgt aactgctgct
+     3541 gggattacac atggcatgga tgagctctac aaataa
+//
