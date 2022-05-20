@@ -388,7 +388,7 @@ def main():
 
     else:
         print("You must provide either a sequence (-s,--sequence) or a csv (--csv)")
-        print("See oligo-maker --help for more info")
+        print("See clonrecall COMMAND --help for more info")
         sys.exit(1)
 
     if args.command == "oligo":
