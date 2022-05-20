@@ -1,0 +1,404 @@
+#!/usr/bin/env python3
+# Generate oligos/plasmids to for use with ClonMapper
+# Copyright (c) 2022 Daylin Morgan <daylinmorgan@gmail.com>
+
+import argparse
+import csv
+import sys
+from datetime import datetime
+from gettext import gettext as _
+from pathlib import Path
+
+OLIGOS = {
+    "AB": {
+        "fwd": {"five": "TACTCGACCAAGAACCGCA", "three": "AGGTGGATTAGTTCTCT"},
+        "rev": {"five": "AAGCAGAGAACTAATCCACCT", "three": "TGCGGTTCTTGGTCG"},
+    },
+    "BC": {
+        "fwd": {"five": "GCTTGTCCTGCGGTTACCC", "three": "AGGCTGTAATCCAGCTG"},
+        "rev": {"five": "AGCGCAGCTGGATTACAGCCT", "three": "GGGTAACCGCAGGAC"},
+    },
+    "CD": {
+        "fwd": {"five": "CGCTGTGGTATCACTCGTC", "three": "AGGCTCAGCTAAGGTGC"},
+        "rev": {"five": "CATTGCACCTTAGCTGAGCCT", "three": "GACGAGTGATACCAC"},
+    },
+}
+
+PLASMID = """LOCUS       Recall-Bg{name}_3x-miniCMV-sfGFP        3576 bp    DNA     circular UNA {date}
+DEFINITION  .
+ACCESSION   urn.local...32-eta8bb4
+VERSION     urn.local...32-eta8bb4
+KEYWORDS    .
+SOURCE
+  ORGANISM  .
+FEATURES             Location/Qualifiers
+     regulatory      10..534
+                     /note="Geneious type: terminator"
+                     /standard_name="rb_glob_PA term"
+     misc_feature    complement(555..561)
+                     /standard_name="SapI"
+     misc_feature    567..573
+                     /standard_name="SapI"
+     misc_feature    complement(601..1220)
+                     /note="Geneious type: origin of replication"
+                     /standard_name="pBR322 origin"
+     misc_feature    complement(1375..2235)
+                     /note="Geneious type: marker"
+                     /standard_name="amp marker"
+     regulatory      complement(2277..2305)
+                     /note="Geneious type: promoter"
+                     /standard_name="amp prom"
+     regulatory      complement(2318..2545)
+                     /note="Geneious type: terminator"
+                     /standard_name="bGH_PA term"
+     misc_feature    complement(2572..2577)
+                     /note="Geneious type: motif"
+                     /standard_name="BsmBI"
+     misc_feature    2603..2608
+                     /note="Geneious type: motif"
+                     /standard_name="BsmBI"
+     misc_feature    2629..2648
+                     /note="Geneious type: marker"
+                     /standard_name="{name}"
+     misc_feature    2649..2651
+                     /note="Geneious type: marker"
+                     /standard_name="PAM"
+     misc_feature    2685..2704
+                     /note="Geneious type: marker"
+                     /standard_name="{name}"
+     misc_feature    2705..2707
+                     /note="Geneious type: marker"
+                     /standard_name="PAM"
+     misc_feature    2741..2760
+                     /note="Geneious type: marker"
+                     /standard_name="{name}"
+     misc_feature    2761..2763
+                     /note="Geneious type: marker"
+                     /standard_name="PAM"
+     regulatory      2782..2842
+                     /note="Geneious type: promoter"
+                     /standard_name="miniCMV"
+     gene            2860..3576
+                     /standard_name="sfGFP"
+ORIGIN
+{sequence}
+//
+"""
+
+TEMPLATE = """
+        1 aggtccggcc gcactcctca ggtgcaggct gcctatcaga aggtggtggc tggtgtggcc
+       61 aatgccctgg ctcacaaata ccactgagat ctttttccct ctgccaaaaa ttatggggac
+      121 atcatgaagc cccttgagca tctgacttct ggctaataaa ggaaatttat tttcattgca
+      181 atagtgtgtt ggaatttttt gtgtctctca ctcggaagga catatgggag ggcaaatcat
+      241 ttaaaacatc agaatgagta tttggtttag agtttggcaa catatgccat atgctggctg
+      301 ccatgaacaa aggtggctat aaagaggtca tcagtatatg aaacagcccc ctgctgtcca
+      361 ttccttattc catagaaaag ccttgacttg aggttagatt ttttttatat tttgttttgt
+      421 gttatttttt tctttaacat ccctaaaatt ttccttacat gttttactag ccagattttt
+      481 cctcctctcc tgactactcc cagtcatagc tgtccctctt ctcttatgaa gatccctcga
+      541 cctgcaggtc accagaagag ctaacggctc ttccaagcgg gccaggaacc gtaaaaaggc
+      601 cgcgttgctg gcgtttttcc ataggctccg cccccctgac gagcatcaca aaaatcgacg
+      661 ctcaagtcag aggtggcgaa acccgacagg actataaaga taccaggcgt ttccccctgg
+      721 aagctccctc gtgcgctctc ctgttccgac cctgccgctt accggatacc tgtccgcctt
+      781 tctcccttcg ggaagcgtgg cgctttctca atgctcacgc tgtaggtatc tcagttcggt
+      841 gtaggtcgtt cgctccaagc tgggctgtgt gcacgaaccc cccgttcagc ccgaccgctg
+      901 cgccttatcc ggtaactatc gtcttgagtc caacccggta agacacgact tatcgccact
+      961 ggcagcagcc actggtaaca ggattagcag agcgaggtat gtaggcggtg ctacagagtt
+     1021 cttgaagtgg tggcctaact acggctacac tagaaggaca gtatttggta tctgcgctct
+     1081 gctgaagcca gttaccttcg gaaaaagagt tggtagctct tgatccggca aacaaaccac
+     1141 cgctggtagc ggtggttttt ttgtttgcaa gcagcagatt acgcgcagaa aaaaaggatc
+     1201 tcaagaagat cctttgatct tttctacggg gtctgacgct cagtggaacg aaaactcacg
+     1261 ttaagggatt ttggtcatga gattatcaaa aaggatcttc acctagatcc ttttaaatta
+     1321 aaaatgaagt tttaaatcaa tctaaagtat atatgagtaa acttggtctg acagttacca
+     1381 atgcttaatc agtgaggcac ctatctcagc gatctgtcta tttcgttcat ccatagttgc
+     1441 ctgactcccc gtcgtgtaga taactacgat acgggagggc ttaccatctg gccccagtgc
+     1501 tgcaatgata ccgcgtgacc cacgctcacc ggctccagat ttatcagcaa taaaccagcc
+     1561 agccggaagg gccgagcgca gaagtggtcc tgcaacttta tccgcctcca tccagtctat
+     1621 taattgttgc cgggaagcta gagtaagtag ttcgccagtt aatagtttgc gcaacgttgt
+     1681 tgccattgct acaggcatcg tggtgtcacg ctcgtcgttt ggtatggctt cattcagctc
+     1741 cggttcccaa cgatcaaggc gagttacatg atcccccatg ttgtgcaaaa aagcggttag
+     1801 ctccttcggt cctccgatcg ttgtcagaag taagttggcc gcagtgttat cactcatggt
+     1861 tatggcagca ctgcataatt ctcttactgt catgccatcc gtaagatgct tttctgtgac
+     1921 tggtgagtac tcaaccaagt cattctgaga atagtgtatg cggcgaccga gttgctcttg
+     1981 cccggcgtca atacgggata ataccgcgcc acatagcaga actttaaaag tgctcatcat
+     2041 tggaaaacgt tcttcggggc gaaaactctc aaggatctta ccgctgttga gatccagttc
+     2101 gatgtaaccc actcgtgcac ccaactgatc ttcagcatct tttactttca ccagcgtttc
+     2161 tgggtgagca aaaacaggaa ggcaaaatgc cgcaaaaaag ggaataaggg cgacacggaa
+     2221 atgttgaata ctcatactct tcctttttca atattattga agcatttatc agggttattg
+     2281 tctcatgagc ggatacatat ttgaatgtat ttagtggcca tagagcccac cgcatcccca
+     2341 gcatgcctgc tattgacttc ccaatcctcc cccttgctgt cctgccccac cccacccccc
+     2401 agaatagaat gacacctact cagacaatgc gatgcaattt cctcatttta ttaggaaagg
+     2461 acagtgggag tggcaccttc cagggtcaag gaaggcacgg gggaggggca aacaacagat
+     2521 ggctggcaac tagaaggcac agtcgaggct gatcagcggg tttaaaggag cgagacgaag
+     2581 gctcactgtg cagactggag cgcgtctcct actcgaccaa gaaccgcann nnnnnnnnnn
+     2641 nnnnnnnnag gtggattagt tctctgcttg tcctgcggtt acccnnnnnn nnnnnnnnnn
+     2701 nnnnaggctg taatccagct gcgctgtggt atcactcgtc nnnnnnnnnn nnnnnnnnnn
+     2761 aggctcagct aaggtgcaat ggtaggcgtg tacggtggga ggcctatata agcagagctc
+     2821 gtttagtgaa ccgtcagatc gcctggagaa ttcgccacca tgagcaaagg agaagaactt
+     2881 ttcactggag ttgtcccaat tcttgttgaa ttagatggtg atgttaatgg gcacaaattt
+     2941 tctgtcagag gagagggtga aggtgatgct acaaacggaa aactcaccct taaatttatt
+     3001 tgcactactg gaaaactacc tgttccatgg ccaacacttg tcactactct gacctatggt
+     3061 gttcaatgct tttcccgtta tccggatcac atgaaacggc atgacttttt caagagtgcc
+     3121 atgcccgaag gttatgtaca ggaacgcact atatctttca aagatgacgg gacctacaag
+     3181 acgcgtgctg aagtcaagtt tgaaggtgat acccttgtta atcgtatcga gttaaaaggt
+     3241 attgatttta aagaagatgg aaacattctc ggacacaaac tcgagtacaa ctttaactca
+     3301 cacaatgtat acatcacggc agacaaacaa aagaatggaa tcaaagctaa cttcaaaatt
+     3361 cgccacaacg ttgaagatgg ttccgttcaa ctagcagacc attatcaaca aaatactcca
+     3421 attggcgatg gccctgtcct tttaccagac aaccattacc tgtcgacaca atctgtcctt
+     3481 tcgaaagatc ccaacgaaaa gcgtgaccac atggtccttc ttgagtttgt aactgctgct
+     3541 gggattacac atggcatgga tgagctctac aaataa
+"""
+
+TEMPLATE_1 = (
+    "aggtccggccgcactcctcaggtgcaggctgcctatcagaaggtggtggctggtgtggcc"
+    "aatgccctggctcacaaataccactgagatctttttccctctgccaaaaattatggggac"
+    "atcatgaagccccttgagcatctgacttctggctaataaaggaaatttattttcattgca"
+    "atagtgtgttggaattttttgtgtctctcactcggaaggacatatgggagggcaaatcat"
+    "ttaaaacatcagaatgagtatttggtttagagtttggcaacatatgccatatgctggctg"
+    "ccatgaacaaaggtggctataaagaggtcatcagtatatgaaacagccccctgctgtcca"
+    "ttccttattccatagaaaagccttgacttgaggttagattttttttatattttgttttgt"
+    "gttatttttttctttaacatccctaaaattttccttacatgttttactagccagattttt"
+    "cctcctctcctgactactcccagtcatagctgtccctcttctcttatgaagatccctcga"
+    "cctgcaggtcaccagaagagctaacggctcttccaagcgggccaggaaccgtaaaaaggc"
+    "cgcgttgctggcgtttttccataggctccgcccccctgacgagcatcacaaaaatcgacg"
+    "ctcaagtcagaggtggcgaaacccgacaggactataaagataccaggcgtttccccctgg"
+    "aagctccctcgtgcgctctcctgttccgaccctgccgcttaccggatacctgtccgcctt"
+    "tctcccttcgggaagcgtggcgctttctcaatgctcacgctgtaggtatctcagttcggt"
+    "gtaggtcgttcgctccaagctgggctgtgtgcacgaaccccccgttcagcccgaccgctg"
+    "cgccttatccggtaactatcgtcttgagtccaacccggtaagacacgacttatcgccact"
+    "ggcagcagccactggtaacaggattagcagagcgaggtatgtaggcggtgctacagagtt"
+    "cttgaagtggtggcctaactacggctacactagaaggacagtatttggtatctgcgctct"
+    "gctgaagccagttaccttcggaaaaagagttggtagctcttgatccggcaaacaaaccac"
+    "cgctggtagcggtggtttttttgtttgcaagcagcagattacgcgcagaaaaaaaggatc"
+    "tcaagaagatcctttgatcttttctacggggtctgacgctcagtggaacgaaaactcacg"
+    "ttaagggattttggtcatgagattatcaaaaaggatcttcacctagatccttttaaatta"
+    "aaaatgaagttttaaatcaatctaaagtatatatgagtaaacttggtctgacagttacca"
+    "atgcttaatcagtgaggcacctatctcagcgatctgtctatttcgttcatccatagttgc"
+    "ctgactccccgtcgtgtagataactacgatacgggagggcttaccatctggccccagtgc"
+    "tgcaatgataccgcgtgacccacgctcaccggctccagatttatcagcaataaaccagcc"
+    "agccggaagggccgagcgcagaagtggtcctgcaactttatccgcctccatccagtctat"
+    "taattgttgccgggaagctagagtaagtagttcgccagttaatagtttgcgcaacgttgt"
+    "tgccattgctacaggcatcgtggtgtcacgctcgtcgtttggtatggcttcattcagctc"
+    "cggttcccaacgatcaaggcgagttacatgatcccccatgttgtgcaaaaaagcggttag"
+    "ctccttcggtcctccgatcgttgtcagaagtaagttggccgcagtgttatcactcatggt"
+    "tatggcagcactgcataattctcttactgtcatgccatccgtaagatgcttttctgtgac"
+    "tggtgagtactcaaccaagtcattctgagaatagtgtatgcggcgaccgagttgctcttg"
+    "cccggcgtcaatacgggataataccgcgccacatagcagaactttaaaagtgctcatcat"
+    "tggaaaacgttcttcggggcgaaaactctcaaggatcttaccgctgttgagatccagttc"
+    "gatgtaacccactcgtgcacccaactgatcttcagcatcttttactttcaccagcgtttc"
+    "tgggtgagcaaaaacaggaaggcaaaatgccgcaaaaaagggaataagggcgacacggaa"
+    "atgttgaatactcatactcttcctttttcaatattattgaagcatttatcagggttattg"
+    "tctcatgagcggatacatatttgaatgtatttagtggccatagagcccaccgcatcccca"
+    "gcatgcctgctattgacttcccaatcctcccccttgctgtcctgccccaccccacccccc"
+    "agaatagaatgacacctactcagacaatgcgatgcaatttcctcattttattaggaaagg"
+    "acagtgggagtggcaccttccagggtcaaggaaggcacgggggaggggcaaacaacagat"
+    "ggctggcaactagaaggcacagtcgaggctgatcagcgggtttaaaggagcgagacgaag"
+    "gctcactgtgcagactggagcgcgtctcctactcgaccaagaaccgca"
+)
+
+BARCODE_ARRAY = """
+{barcode}
+aggtggattagttctctgcttgtcctgcggttaccc
+{barcode}
+aggctgtaatccagctgcgctgtggtatcactcgtc
+{barcode}
+""".replace(
+    "\n", ""
+)
+
+TEMPLATE_2 = (
+    "aggctcagctaaggtgcaatggtaggcgtgtacggtgggaggcctatataagcagagctc"
+    "gtttagtgaaccgtcagatcgcctggagaattcgccaccatgagcaaaggagaagaactt"
+    "ttcactggagttgtcccaattcttgttgaattagatggtgatgttaatgggcacaaattt"
+    "tctgtcagaggagagggtgaaggtgatgctacaaacggaaaactcacccttaaatttatt"
+    "tgcactactggaaaactacctgttccatggccaacacttgtcactactctgacctatggt"
+    "gttcaatgcttttcccgttatccggatcacatgaaacggcatgactttttcaagagtgcc"
+    "atgcccgaaggttatgtacaggaacgcactatatctttcaaagatgacgggacctacaag"
+    "acgcgtgctgaagtcaagtttgaaggtgatacccttgttaatcgtatcgagttaaaaggt"
+    "attgattttaaagaagatggaaacattctcggacacaaactcgagtacaactttaactca"
+    "cacaatgtatacatcacggcagacaaacaaaagaatggaatcaaagctaacttcaaaatt"
+    "cgccacaacgttgaagatggttccgttcaactagcagaccattatcaacaaaatactcca"
+    "attggcgatggccctgtccttttaccagacaaccattacctgtcgacacaatctgtcctt"
+    "tcgaaagatcccaacgaaaagcgtgaccacatggtccttcttgagtttgtaactgctgct"
+    "gggattacacatggcatggatgagctctacaaataa"
+)
+
+# custom formatter to remove extra metavar
+class CustomHelpFormatter(argparse.HelpFormatter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, max_help_position=40, width=80, **kwargs)
+
+    def _format_action_invocation(self, action):
+        if not action.option_strings or action.nargs == 0:
+            return super()._format_action_invocation(action)
+        default = self._get_default_metavar_for_optional(action)
+        args_string = self._format_args(action, default)
+        return ", ".join(action.option_strings) + " " + args_string
+
+
+def get_argparser():
+    parser = argparse.ArgumentParser(
+        description="generate ClonMapper oligos/plasmids with specified barcode sequence.",
+        formatter_class=CustomHelpFormatter,
+    )
+    shared_args = argparse.ArgumentParser(add_help=False)
+    shared_args.add_argument(
+        "--csv",
+        help="csv containing two columns, name and sequence, no header",
+        metavar="FILE",
+    )
+    shared_args.add_argument("-n","--name", help="name")
+    shared_args.add_argument("-s", "--sequence", help="sequence", metavar="SEQ")
+    shared_args.add_argument(
+        "--skip-validation", action="store_true", help="skip validation"
+    )
+
+    subs = parser.add_subparsers(title="commands", dest="command", metavar="")
+    oligo_p = subs.add_parser(
+        "oligo",
+        help="generate oligos",
+        parents=[shared_args],
+        formatter_class=CustomHelpFormatter,
+    )
+
+    oligo_p.add_argument(
+        "-o", "--output", help="csv file to output list (default stdout)"
+    )
+
+    plasmid_p = subs.add_parser(
+        "plasmid",
+        help="generate plasmids",
+        parents=[shared_args],
+        formatter_class=CustomHelpFormatter,
+    )
+    plasmid_p.add_argument(
+        "-o",
+        "--output",
+        help="directory output plasmid .gb files (default .)",
+        default="./",
+    )
+    parser.parse_args()
+
+    return parser
+
+
+def reverse_complement(barcode):
+    reverse_base = {"A": "T", "T": "A", "G": "C", "C": "G"}
+    return "".join([reverse_base[base] for base in barcode][::-1])
+
+
+def make_oligo_line(name, barcode, overhangs):
+    return [
+        f"{name}-{overhangs}-{read},{seqs['five']}{barcode if read=='fwd' else reverse_complement(barcode)}{seqs['three']}"
+        for read, seqs in OLIGOS[overhangs].items()
+    ]
+
+
+def validate_sequence(sequence):
+    if len(sequence) != 20:
+        print("ERROR. Unexpected 20bp sequence:")
+        print("You can override this by passing --skip-validation")
+        sys.exit(1)
+    if not set(sequence.upper()).issubset({"A", "T", "G", "C"}):
+        print("ERROR. Unexpected base in sequence, see below:")
+        print(f"Bad sequence: {sequence}")
+        print(
+            "              "
+            + "".join([" " if base in "ATGC" else f"^" for base in sequence])
+        )
+        print("You can override this by passing --skip-validation")
+        sys.exit(1)
+
+
+def generate_oligos(sequences, output):
+    lines = []
+    for name, sequence in sequences.items():
+        for overhangs in OLIGOS:
+            lines.extend(make_oligo_line(name, sequence, overhangs))
+
+    if output:
+        with open(output, "w") as f:
+            f.write("\n".join(lines))
+    else:
+        for line in lines:
+            print(line)
+
+
+def get_date():
+    return datetime.now().strftime("%d-%^B-%Y")
+
+
+def generate_plasmid_seq(barcode):
+    template = TEMPLATE_1 + BARCODE_ARRAY.format(barcode=barcode.lower()) + TEMPLATE_2
+    split_template = [template[i : i + 10] for i in range(0, len(template), 10)]
+    template_lines = [
+        " ".join(split_template[i : i + 6]) for i in range(0, len(split_template), 6)
+    ]
+    labels = [f"{i:>9}" for i in range(1, len(template), 60)]
+    template_complete = "\n".join(
+        [" ".join([label, seq]) for label, seq in zip(labels, template_lines)]
+    )
+    return template_complete
+
+
+def generate_plasmids(sequences, output):
+
+    out_path = Path(output)
+    if not out_path.is_dir():
+        out_path.mkdir(exist_ok=True)
+    for name, sequence in sequences.items():
+        generate_plasmid_seq(sequence)
+        plasmid_gb = PLASMID.format(
+            name=name, sequence=generate_plasmid_seq(sequence), date=get_date()
+        )
+        with (out_path / f"Recall_Bg{name}_3x-miniCMV-sfGFP.gb").open("w") as f:
+            f.write(plasmid_gb)
+
+
+def main():
+    parser = get_argparser()
+    args = parser.parse_args()
+    sequences = {}
+    if not args.command:
+        print("ERROR. Must specify command.\n")
+        parser.print_help()
+        sys.exit(1)
+
+    if args.sequence:
+        print(args.sequence)
+        if not args.name:
+            print("If using --sequence you must provide --name NAME")
+            sys.exit(1)
+
+        if not args.skip_validation:
+            validate_sequence(args.sequence)
+
+        sequences[args.name] = args.sequence
+
+    elif args.csv:
+        with Path(args.csv).open("r") as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if len(row) > 2:
+                    print("ERROR. Unexpected columns in csv")
+                    print("Only include NAME,SEQUENCE")
+                    sys.exit(1)
+                if not args.skip_validation:
+                    validate_sequence(row[1])
+                sequences[row[0]] = row[1]
+
+    else:
+        print("You must provide either a sequence (-s,--sequence) or a csv (--csv)")
+        print("See oligo-maker --help for more info")
+        sys.exit(1)
+
+    if args.command == "oligo":
+        print("Generating oligos")
+        generate_oligos(sequences, args.output)
+    elif args.command == "plasmid":
+        print("Generating plasmids")
+        generate_plasmids(sequences, args.output)
+        pass
+
+
+if __name__ == "__main__":
+    main()
