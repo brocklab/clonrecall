@@ -364,7 +364,6 @@ def main():
         sys.exit(1)
 
     if args.sequence:
-        print(args.sequence)
         if not args.name:
             print("If using --sequence you must provide --name NAME")
             sys.exit(1)
