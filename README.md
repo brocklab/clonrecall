@@ -16,13 +16,6 @@ git clone git@github.com:brocklab/clonrecall.git
 cd clonrecall
 ```
 
-If you want to "install" the script ensure it is executable and move it somewhere on you path like `~/bin`.
-
-```
-chmod u+x clonrecall
-cp clonrecall ~/bin
-```
-
 ## Usage
 
 There are two commands for `clonrecall` each has essentially the same sets of flags to control behavior.
@@ -39,7 +32,7 @@ lin2,ACGGGTAGACCATACGATGC
 
 To generate all six oligos which will be used to generate the recall plasmid you can use something like the below command:
 ```bash
-clonrecall oligo -s GCAATATGCGGTACGATTCG -n lin1
+./clonrecall oligo -s GCAATATGCGGTACGATTCG -n lin1
 ```
 
 By default the oligos command will print the comma separated sequences to `stdout`.
@@ -53,5 +46,5 @@ Similarly you can generate an annotated recall vector with a 3x barcode array.
 In this case `-o/--output` is specifying a directory to save all generated `.gb` files.
 
 ```bash
-clonrecall plasmid -s ACGGGTAGACCATACGATGC -n lin2 -o recall-vectors
+./clonrecall plasmid -s ACGGGTAGACCATACGATGC -n lin2 -o recall-vectors
 ```
