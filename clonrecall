@@ -183,7 +183,7 @@ def get_argparser():
         help="csv containing two columns, name and sequence, no header",
         metavar="FILE",
     )
-    shared_args.add_argument("-n","--name", help="name")
+    shared_args.add_argument("-n", "--name", help="name")
     shared_args.add_argument("-s", "--sequence", help="sequence", metavar="SEQ")
     shared_args.add_argument(
         "--skip-validation", action="store_true", help="skip validation"
@@ -198,7 +198,7 @@ def get_argparser():
     )
 
     oligo_p.add_argument(
-        "-o", "--output", help="csv file to output list (default stdout)"
+        "-o", "--output", help="csv file to output list (default stdout)", type=Path
     )
 
     plasmid_p = subs.add_parser(
@@ -212,13 +212,14 @@ def get_argparser():
         "--output",
         help="directory output plasmid .gb files (default .)",
         default="./",
+        type=Path
     )
 
     return parser
 
 
 def reverse_complement(barcode):
-    reverse_base = {"A": "T", "T": "A", "G": "C", "C": "G"}
+    reverse_base = {"A": "T", "T": "A", "G": "C", "C": "G", "N": "N"}
     return "".join([reverse_base[base] for base in barcode][::-1])
 
 
@@ -250,8 +251,11 @@ def generate_oligos(sequences, output):
     for name, sequence in sequences.items():
         for overhangs in OLIGOS:
             lines.extend(make_oligo_line(name, sequence, overhangs))
-
+        
     if output:
+        if output.suffix != ".csv":
+            print(f"error: incorrect suffix for output: {output.suffix}\nplease specify a csv file")
+            sys.exit(1)
         with open(output, "w") as f:
             f.write("\n".join(lines))
     else:
@@ -327,10 +331,8 @@ def main():
         sys.exit(1)
 
     if args.command == "oligo":
-        print("Generating oligos")
         generate_oligos(sequences, args.output)
     elif args.command == "plasmid":
-        print("Generating plasmids")
         generate_plasmids(sequences, args.output)
         pass
 
